@@ -114,10 +114,10 @@ export function Shell() {
           <div className="flex items-center gap-2 sm:gap-3">
             <button className="icon-button lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={18} /></button>
             <form onSubmit={submitSearch} className="group relative min-w-0 flex-1">
-              <span className="pointer-events-none absolute left-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded bg-slate-100 text-slate-500 group-focus-within:bg-cyan-50 group-focus-within:text-cyan-700 dark:bg-slate-800 dark:text-slate-400 dark:group-focus-within:bg-cyan-950/40 dark:group-focus-within:text-cyan-300">
+              <span className="pointer-events-none absolute left-3 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md bg-slate-100 text-slate-500 group-focus-within:bg-cyan-50 group-focus-within:text-cyan-700 dark:bg-slate-800 dark:text-slate-400 dark:group-focus-within:bg-cyan-950/40 dark:group-focus-within:text-cyan-300">
                 <Search size={17} />
               </span>
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search topics, sources, keywords" className="field h-12 w-full rounded-lg bg-white/95 pl-14 pr-4 shadow-sm placeholder:text-slate-400 dark:bg-slate-900/85 dark:placeholder:text-slate-500" />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search topics, sources, keywords" className="focus-ring h-12 w-full rounded-lg border border-slate-200 bg-white/95 py-0 pl-14 pr-4 text-sm shadow-sm placeholder:text-slate-400 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900/85 dark:placeholder:text-slate-500 dark:hover:border-slate-600" />
             </form>
             <button onClick={exportPdf} className="icon-button hidden sm:inline-grid" aria-label="Download PDF report" title="Download PDF report"><FileDown size={18} /></button>
             <button onClick={() => setDark((value) => !value)} className="icon-button" aria-label="Toggle dark mode">{dark ? <Sun size={18} /> : <Moon size={18} />}</button>
