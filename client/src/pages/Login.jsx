@@ -54,7 +54,7 @@ function SlideCaption({ active }) {
 
 function InputField({ label, icon, rightElement, children }) {
   return (
-    <div className="mb-2 sm:mb-4">
+    <div className="mb-3 sm:mb-4">
       <label className="mb-1 block text-xs font-medium text-slate-700 sm:mb-1.5 sm:text-sm">{label}</label>
       <div className="relative flex items-center">
         <span className="pointer-events-none absolute left-3 text-slate-400 sm:left-3.5">{icon}</span>
@@ -106,9 +106,10 @@ export default function Login() {
     'w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-10 py-2.5 text-xs text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 sm:rounded-xl sm:pl-10 sm:py-3 sm:text-sm';
 
   return (
-    <main className="flex min-h-screen flex-col bg-white text-slate-900 lg:grid lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
+    <main className="min-h-screen bg-white text-slate-900 lg:grid lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
+
       {/* left: brand + form */}
-      <div className="flex flex-col bg-white px-3 py-3 sm:px-8 sm:py-6 md:px-12 lg:px-16 lg:py-8 lg:overflow-y-auto lg:h-screen">
+      <div className="flex min-h-screen flex-col px-4 py-4 sm:px-8 sm:py-6 md:px-12 lg:min-h-0 lg:h-screen lg:overflow-y-auto lg:px-16 lg:py-8">
 
         {/* logo */}
         <div className="flex items-center gap-2">
@@ -120,94 +121,95 @@ export default function Login() {
         </div>
 
         {/* mobile slide banner */}
-        <div className="relative mt-2 h-24 w-full overflow-hidden rounded-lg sm:mt-4 sm:h-36 md:h-44 lg:hidden">
+        <div className="relative mt-3 h-36 w-full overflow-hidden rounded-xl sm:mt-5 sm:h-44 md:h-52 lg:hidden">
           <SlidePhotos active={slide} />
           <SlideCaption active={slide} />
         </div>
 
-        {/* form */}
-        <form
-          onSubmit={handleSubmit}
-          className="mx-auto flex w-full max-w-xs flex-col mt-4 sm:max-w-sm sm:mt-8 lg:flex-1 lg:justify-center lg:mt-0"
-        >
-          <p className="text-xs text-slate-400 sm:text-sm">{isSignup ? 'Start your journey' : 'Welcome back'}</p>
-          <h1 className="mb-4 mt-1 text-lg font-bold leading-tight text-slate-900 sm:mb-8 sm:mt-2 sm:text-2xl md:text-[26px]">
-            {isSignup ? 'Create your account' : 'Sign in to TrendWatch'}
-          </h1>
+        {/* form — takes remaining space and centers itself */}
+        <div className="flex flex-1 items-center justify-center py-6 lg:py-0">
+          <form
+            onSubmit={handleSubmit}
+            className="w-full max-w-sm"
+          >
+            <p className="text-xs text-slate-400 sm:text-sm">{isSignup ? 'Start your journey' : 'Welcome back'}</p>
+            <h1 className="mb-5 mt-1 text-xl font-bold leading-tight text-slate-900 sm:mb-8 sm:mt-2 sm:text-2xl md:text-[26px]">
+              {isSignup ? 'Create your account' : 'Sign in to TrendWatch'}
+            </h1>
 
-          {isSignup && (
-            <InputField label="Full name" icon={<User size={16} />}>
+            {isSignup && (
+              <InputField label="Full name" icon={<User size={16} />}>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required={isSignup}
+                  placeholder="Jane Doe"
+                  className={inputClass}
+                />
+              </InputField>
+            )}
+
+            <InputField label="Email address" icon={<Mail size={16} />}>
               <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required={isSignup}
-                placeholder="Jane Doe"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="you@example.com"
                 className={inputClass}
               />
             </InputField>
-          )}
 
-          <InputField label="Email address" icon={<Mail size={16} />}>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-              className={inputClass}
-            />
-          </InputField>
+            <InputField
+              label="Password"
+              icon={<Lock size={16} />}
+              rightElement={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  tabIndex={-1}
+                  className="text-slate-400 transition-colors hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              }
+            >
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={isSignup ? 8 : 6}
+                placeholder={isSignup ? 'At least 8 characters' : '••••••••'}
+                className={inputClass}
+              />
+            </InputField>
 
-          <InputField
-            label="Password"
-            icon={<Lock size={16} />}
-            rightElement={
+            {error && (
+              <p className="mb-3 rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-600 sm:mb-4 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm">
+                {error}
+              </p>
+            )}
+
+            <button
+              disabled={loading}
+              className="mt-1 h-10 w-full rounded-lg bg-blue-600 text-xs font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60 sm:mt-2 sm:h-12 sm:rounded-xl sm:text-sm"
+            >
+              {loading ? (isSignup ? 'Creating account…' : 'Signing in…') : isSignup ? 'Create account' : 'Sign in'}
+            </button>
+
+            <p className="mt-4 text-center text-xs text-slate-500 sm:mt-6 sm:text-sm">
+              {isSignup ? 'Already have an account? ' : "Don't have an account? "}
               <button
                 type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                tabIndex={-1}
-                className="text-slate-400 transition-colors hover:text-slate-600"
+                onClick={() => setIsSignup((v) => !v)}
+                className="font-semibold text-blue-600 hover:underline"
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                {isSignup ? 'Sign in' : 'Sign up'}
               </button>
-            }
-          >
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={isSignup ? 8 : 6}
-              placeholder={isSignup ? 'At least 8 characters' : '••••••••'}
-              className={inputClass}
-            />
-          </InputField>
-
-          {error && (
-            <p className="mb-2 rounded-lg bg-rose-50 px-3 py-1.5 text-xs text-rose-600 sm:mb-4 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm">
-              {error}
             </p>
-          )}
-
-          <button
-            disabled={loading}
-            className="mt-1 h-9 w-full rounded-lg bg-blue-600 text-xs font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60 sm:mt-2 sm:h-12 sm:rounded-xl sm:text-sm"
-          >
-            {loading ? (isSignup ? 'Creating account…' : 'Signing in…') : isSignup ? 'Create account' : 'Sign in'}
-          </button>
-
-          {/* switch mode — centered, like other apps */}
-          <p className="mt-2 text-center text-xs text-slate-500 sm:mt-6 sm:text-sm">
-            {isSignup ? 'Already have an account? ' : "Don't have an account? "}
-            <button
-              type="button"
-              onClick={() => setIsSignup((v) => !v)}
-              className="font-semibold text-blue-600 hover:underline"
-            >
-              {isSignup ? 'Sign in' : 'Sign up'}
-            </button>
-          </p>
-        </form>
+          </form>
+        </div>
       </div>
 
       {/* right: full photo panel — desktop only */}
