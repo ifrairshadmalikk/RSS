@@ -15,7 +15,7 @@ import rssRoutes from './routes/rss.js';
 import searchRoutes from './routes/search.js';
 import trendRoutes from './routes/trends.js';
 import { errorHandler } from './middleware/errorHandler.js';
-//server
+
 export const app = express();
 
 let initPromise = null;
@@ -53,7 +53,15 @@ app.use(async (req, res, next) => {
 });
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || '*', credentials: true }));
+
+const clientOrigins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(',').map((value) => value.trim()).filter(Boolean)
+  : null;
+
+app.use(cors({
+  origin: clientOrigins || true,
+  credentials: Boolean(clientOrigins)
+}));
 app.use(express.json({ limit: '5mb' }));
 app.use(morgan('dev'));
 
