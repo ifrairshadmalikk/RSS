@@ -106,10 +106,10 @@ export default function Login() {
     'w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-10 py-2.5 text-xs text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 sm:rounded-xl sm:pl-10 sm:py-3 sm:text-sm';
 
   return (
-    <main className="min-h-screen bg-white text-slate-900 lg:grid lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
+    <main className="bg-white text-slate-900 lg:grid lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
 
       {/* left: brand + form */}
-      <div className="flex min-h-screen flex-col px-4 py-4 sm:px-8 sm:py-6 md:px-12 lg:min-h-0 lg:h-screen lg:overflow-y-auto lg:px-16 lg:py-8">
+      <div className="flex flex-col px-4 py-4 sm:px-8 sm:py-6 md:px-12 lg:h-screen lg:overflow-y-auto lg:px-16 lg:py-8">
 
         {/* logo */}
         <div className="flex items-center gap-2">
@@ -126,13 +126,9 @@ export default function Login() {
           <SlideCaption active={slide} />
         </div>
 
-        {/* ✅ FIX: removed flex-1 + items-center on mobile to prevent the huge gap.
-            On desktop (lg) we still center vertically using flex-1 + justify-center. */}
-        <div className="w-full max-w-sm py-6 lg:flex lg:flex-1 lg:items-center lg:justify-center lg:py-0 lg:self-center lg:mx-auto">
-          <form
-            onSubmit={handleSubmit}
-            className="w-full"
-          >
+        {/* form area — no flex-1 on mobile, just natural flow with top padding */}
+        <div className="pt-5 pb-8 sm:pt-6 lg:flex lg:flex-1 lg:items-center lg:py-0">
+          <form onSubmit={handleSubmit} className="w-full max-w-sm lg:mx-auto">
             <p className="text-xs text-slate-400 sm:text-sm">{isSignup ? 'Start your journey' : 'Welcome back'}</p>
             <h1 className="mb-5 mt-1 text-xl font-bold leading-tight text-slate-900 sm:mb-8 sm:mt-2 sm:text-2xl md:text-[26px]">
               {isSignup ? 'Create your account' : 'Sign in to TrendWatch'}
