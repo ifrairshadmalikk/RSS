@@ -66,6 +66,10 @@ app.use(cors({
 app.use(express.json({ limit: '5mb' }));
 app.use(morgan('dev'));
 
+app.get('/', (_req, res) => {
+  res.json({ message: 'TrendWatch API is running', status: 'ok' });
+});
+
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
