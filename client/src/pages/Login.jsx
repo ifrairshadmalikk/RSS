@@ -54,7 +54,7 @@ function SlideCaption({ active }) {
 
 function InputField({ label, icon, rightElement, children }) {
   return (
-    <div className="mb-3 sm:mb-4">
+    <div className="mb-2 sm:mb-4">
       <label className="mb-1 block text-xs font-medium text-slate-700 sm:mb-1.5 sm:text-sm">{label}</label>
       <div className="relative flex items-center">
         <span className="pointer-events-none absolute left-3 text-slate-400 sm:left-3.5">{icon}</span>
@@ -120,15 +120,15 @@ export default function Login() {
         </div>
 
         {/* mobile slide banner */}
-        <div className="relative mt-4 h-32 w-full overflow-hidden rounded-xl sm:mt-5 sm:h-40 md:h-48 lg:hidden">
+        <div className="relative mt-2 h-24 w-full overflow-hidden rounded-lg sm:mt-4 sm:h-36 md:h-44 lg:hidden">
           <SlidePhotos active={slide} />
           <SlideCaption active={slide} />
         </div>
 
         {/* form */}
-        <form onSubmit={handleSubmit} className="mx-auto flex w-full max-w-xs flex-1 flex-col justify-center py-3 sm:max-w-sm sm:py-4 md:py-5 lg:py-6">
+        <form onSubmit={handleSubmit} className="mx-auto flex w-full max-w-xs flex-1 flex-col justify-start py-2 sm:max-w-sm sm:justify-center sm:py-4 md:py-5 lg:py-6">
           <p className="text-xs text-slate-400 sm:text-sm">{isSignup ? 'Start your journey' : 'Welcome back'}</p>
-          <h1 className="mb-6 mt-2 text-xl font-bold leading-tight text-slate-900 sm:mb-8 sm:text-2xl md:text-[26px]">
+          <h1 className="mb-4 mt-1 text-lg font-bold leading-tight text-slate-900 sm:mb-8 sm:mt-2 sm:text-2xl md:text-[26px]">
             {isSignup ? 'Create your account' : 'Sign in to TrendWatch'}
           </h1>
 
@@ -181,20 +181,20 @@ export default function Login() {
           </InputField>
 
           {error && (
-            <p className="mb-3 rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-600 sm:mb-4 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm">
+            <p className="mb-2 rounded-lg bg-rose-50 px-3 py-1.5 text-xs text-rose-600 sm:mb-4 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm">
               {error}
             </p>
           )}
 
           <button
             disabled={loading}
-            className="mt-1 h-10 w-full rounded-lg bg-blue-600 text-xs font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60 sm:mt-2 sm:h-12 sm:rounded-xl sm:text-sm"
+            className="mt-1 h-9 w-full rounded-lg bg-blue-600 text-xs font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60 sm:mt-2 sm:h-12 sm:rounded-xl sm:text-sm"
           >
             {loading ? (isSignup ? 'Creating account…' : 'Signing in…') : isSignup ? 'Create account' : 'Sign in'}
           </button>
 
           {/* switch mode — centered, like other apps */}
-          <p className="mt-4 text-center text-xs text-slate-500 sm:mt-6 sm:text-sm">
+          <p className="mt-2 text-center text-xs text-slate-500 sm:mt-6 sm:text-sm">
             {isSignup ? 'Already have an account? ' : "Don't have an account? "}
             <button
               type="button"
