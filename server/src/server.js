@@ -1,4 +1,4 @@
-import cors from 'cors';
+//imports import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
