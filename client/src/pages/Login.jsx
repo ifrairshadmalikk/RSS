@@ -108,7 +108,7 @@ export default function Login() {
   return (
     <main className="flex min-h-screen flex-col bg-white text-slate-900 lg:grid lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
       {/* left: brand + form */}
-      <div className="flex flex-1 flex-col overflow-y-auto bg-white px-4 py-4 sm:px-8 sm:py-6 md:px-12 lg:px-16 lg:py-8">
+      <div className="flex flex-1 flex-col overflow-y-auto bg-white px-3 py-3 sm:px-8 sm:py-6 md:px-12 lg:px-16 lg:py-8">
 
         {/* logo */}
         <div className="flex items-center gap-2">
@@ -126,7 +126,7 @@ export default function Login() {
         </div>
 
         {/* form */}
-        <form onSubmit={handleSubmit} className="mx-auto flex w-full max-w-xs flex-1 flex-col justify-start py-2 sm:max-w-sm sm:justify-center sm:py-4 md:py-5 lg:py-6">
+        <form onSubmit={handleSubmit} className="mx-auto flex w-full max-w-xs flex-col py-2 sm:max-w-sm sm:flex-1 sm:justify-center sm:py-4 md:py-5 lg:py-6">
           <p className="text-xs text-slate-400 sm:text-sm">{isSignup ? 'Start your journey' : 'Welcome back'}</p>
           <h1 className="mb-4 mt-1 text-lg font-bold leading-tight text-slate-900 sm:mb-8 sm:mt-2 sm:text-2xl md:text-[26px]">
             {isSignup ? 'Create your account' : 'Sign in to TrendWatch'}
