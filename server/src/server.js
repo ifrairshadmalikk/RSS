@@ -40,6 +40,10 @@ async function ensureReady() {
 }
 
 app.use(async (req, res, next) => {
+  if (req.path === '/api/health') {
+    return next();
+  }
+
   try {
     await ensureReady();
     next();
@@ -54,7 +58,11 @@ app.use(express.json({ limit: '5mb' }));
 app.use(morgan('dev'));
 
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    databaseConfigured: Boolean(process.env.MONGODB_URI)
+  });
 });
 
 app.use('/api/assistant', assistantRoutes);

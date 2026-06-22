@@ -1,5 +1,14 @@
+const configErrorPatterns = [
+  'MONGODB_URI is not configured',
+  'MONGODB_URI still contains <db_password>',
+  'MongoDB Atlas authentication failed'
+];
+
 export function errorHandler(error, _req, res, _next) {
   console.error(error);
+  if (configErrorPatterns.some((pattern) => error.message?.includes(pattern))) {
+    return res.status(503).json({ message: error.message });
+  }
   if (error.code === 11000) {
     const field = Object.keys(error.keyPattern || {})[0];
     const message = field === 'email'

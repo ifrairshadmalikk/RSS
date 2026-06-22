@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
-import app from './server.js';
 
 dotenv.config();
+
+const { default: app } = await import('./server.js');
 
 export default app;
