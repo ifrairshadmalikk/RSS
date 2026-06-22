@@ -24,13 +24,15 @@ function SlidePhotos({ active }) {
       {SLIDES.map((s, i) => (
         <div
           key={s.image}
-          className={`lw-slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${i === active ? 'opacity-100' : 'opacity-0'}`}
+          className={`lw-slide absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+            i === active ? 'opacity-100' : 'opacity-0'
+          }`}
           style={{ backgroundImage: `url(${s.image})` }}
           role="img"
           aria-label={s.tagline}
         />
       ))}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-slate-950/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-slate-950/10" />
       <div className="absolute inset-0 bg-blue-900/20 mix-blend-multiply" />
     </>
   );
@@ -38,13 +40,15 @@ function SlidePhotos({ active }) {
 
 function SlideCaption({ active }) {
   return (
-    <div className="absolute inset-x-4 bottom-4 text-white lg:inset-x-12 lg:bottom-12">
-      <p className="text-sm font-medium drop-shadow-sm lg:text-lg">{SLIDES[active].tagline}</p>
-      <div className="mt-2 flex gap-1.5 sm:mt-3">
+    <div className="absolute inset-x-5 bottom-5 text-white lg:inset-x-12 lg:bottom-12">
+      <p className="text-base font-semibold drop-shadow-sm lg:text-lg">{SLIDES[active].tagline}</p>
+      <div className="mt-2 flex gap-1.5">
         {SLIDES.map((_, i) => (
           <span
             key={i}
-            className={`h-1.5 rounded-full transition-all duration-500 ${i === active ? 'w-6 bg-white' : 'w-1.5 bg-white/40'}`}
+            className={`h-1.5 rounded-full transition-all duration-500 ${
+              i === active ? 'w-6 bg-white' : 'w-1.5 bg-white/40'
+            }`}
           />
         ))}
       </div>
@@ -54,14 +58,12 @@ function SlideCaption({ active }) {
 
 function InputField({ label, icon, rightElement, children }) {
   return (
-    <div className="mb-4">
+    <div className="mb-3.5">
       <label className="mb-1.5 block text-sm font-medium text-slate-700">{label}</label>
       <div className="relative flex items-center">
         <span className="pointer-events-none absolute left-3.5 text-slate-400">{icon}</span>
         {children}
-        {rightElement && (
-          <span className="absolute right-3.5">{rightElement}</span>
-        )}
+        {rightElement && <span className="absolute right-3.5">{rightElement}</span>}
       </div>
     </div>
   );
@@ -96,7 +98,10 @@ export default function Login() {
       }
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || (isSignup ? 'Unable to create account.' : 'Unable to sign in. Check credentials.'));
+      setError(
+        err.response?.data?.message ||
+          (isSignup ? 'Unable to create account.' : 'Unable to sign in. Check credentials.')
+      );
     } finally {
       setLoading(false);
     }
@@ -106,31 +111,44 @@ export default function Login() {
     'w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-10 py-3 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100';
 
   return (
-    <main className="bg-white text-slate-900 lg:grid lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
+    <main className="min-h-screen bg-white text-slate-900 lg:grid lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
 
-      {/* left: brand + form */}
-      <div className="flex flex-col px-5 py-5 sm:px-10 sm:py-7 md:px-14 lg:h-screen lg:overflow-y-auto lg:px-16 lg:py-8">
+      {/* ── MOBILE LAYOUT: stacked full-screen ── */}
+      <div className="flex flex-col lg:contents">
 
-        {/* logo */}
-        <div className="flex items-center gap-2.5">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-600 text-white">
-            <Activity size={18} />
-          </div>
-          <span className="text-lg font-semibold">TrendWatch</span>
-        </div>
-
-        {/* mobile slide banner */}
-        <div className="relative mt-4 h-40 w-full overflow-hidden rounded-2xl sm:mt-6 sm:h-48 lg:hidden">
+        {/* Slide panel — top half on mobile, right column on desktop */}
+        <div className="relative h-[45vh] w-full overflow-hidden lg:order-2 lg:h-full lg:rounded-l-3xl">
           <SlidePhotos active={slide} />
+
+          {/* Logo badge — visible on mobile inside the slide */}
+          <div className="absolute left-4 top-4 flex items-center gap-2 lg:hidden">
+            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-blue-600 text-white shadow-md">
+              <Activity size={16} />
+            </div>
+            <span className="text-sm font-semibold text-white drop-shadow">TrendWatch</span>
+          </div>
+
           <SlideCaption active={slide} />
         </div>
 
-        {/* form */}
-        <div className="pt-6 pb-10 lg:flex lg:flex-1 lg:items-center lg:py-0">
-          <form onSubmit={handleSubmit} className="w-full max-w-sm lg:mx-auto">
+        {/* Form panel — bottom half on mobile, left column on desktop */}
+        <div className="flex flex-1 flex-col overflow-y-auto bg-white px-5 pb-8 pt-6 lg:order-1 lg:h-screen lg:px-16 lg:py-8">
 
+          {/* Logo — desktop only */}
+          <div className="mb-auto hidden items-center gap-2.5 lg:flex">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-600 text-white">
+              <Activity size={18} />
+            </div>
+            <span className="text-lg font-semibold">TrendWatch</span>
+          </div>
+
+          {/* Form centred */}
+          <form
+            onSubmit={handleSubmit}
+            className="mx-auto w-full max-w-sm lg:my-auto"
+          >
             <p className="text-sm text-slate-400">{isSignup ? 'Start your journey' : 'Welcome back'}</p>
-            <h1 className="mb-6 mt-1 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
+            <h1 className="mb-5 mt-1 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
               {isSignup ? 'Create your account' : 'Sign in to TrendWatch'}
             </h1>
 
@@ -183,7 +201,7 @@ export default function Login() {
             </InputField>
 
             {error && (
-              <p className="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-600">
+              <p className="mb-3 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-600">
                 {error}
               </p>
             )}
@@ -192,10 +210,16 @@ export default function Login() {
               disabled={loading}
               className="mt-2 h-12 w-full rounded-xl bg-blue-600 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60"
             >
-              {loading ? (isSignup ? 'Creating account…' : 'Signing in…') : isSignup ? 'Create account' : 'Sign in'}
+              {loading
+                ? isSignup
+                  ? 'Creating account…'
+                  : 'Signing in…'
+                : isSignup
+                ? 'Create account'
+                : 'Sign in'}
             </button>
 
-            <p className="mt-5 text-center text-sm text-slate-500">
+            <p className="mt-4 text-center text-sm text-slate-500">
               {isSignup ? 'Already have an account? ' : "Don't have an account? "}
               <button
                 type="button"
@@ -206,13 +230,10 @@ export default function Login() {
               </button>
             </p>
           </form>
-        </div>
-      </div>
 
-      {/* right: full photo panel — desktop only */}
-      <div className="relative hidden overflow-hidden rounded-l-3xl lg:block">
-        <SlidePhotos active={slide} />
-        <SlideCaption active={slide} />
+          {/* spacer so content doesn't hug bottom on tall phones */}
+          <div className="mt-auto hidden lg:block" />
+        </div>
       </div>
 
       <style>{`
