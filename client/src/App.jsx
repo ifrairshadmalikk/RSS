@@ -9,7 +9,7 @@ import NewsFeed from './pages/NewsFeed.jsx';
 import Notifications from './pages/Notifications.jsx';
 import Settings from './pages/Settings.jsx';
 import Trends from './pages/Trends.jsx';
-
+//logics
 function Protected({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
