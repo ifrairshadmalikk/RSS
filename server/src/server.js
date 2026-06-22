@@ -1,7 +1,10 @@
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
+import mongoose from 'mongoose';
 import morgan from 'morgan';
+import { bootstrapAdminFromEnv, bootstrapDefaultContent } from './config/bootstrap.js';
+import { connectDatabase } from './config/database.js';
 import assistantRoutes from './routes/assistant.js';
 import articleRoutes from './routes/articles.js';
 import authRoutes from './routes/auth.js';
@@ -14,6 +17,36 @@ import trendRoutes from './routes/trends.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 export const app = express();
+
+let initPromise = null;
+
+async function ensureReady() {
+  if (mongoose.connection.readyState !== 0) {
+    return;
+  }
+
+  if (!initPromise) {
+    initPromise = (async () => {
+      await connectDatabase();
+      await bootstrapAdminFromEnv();
+      await bootstrapDefaultContent();
+    })().catch((error) => {
+      initPromise = null;
+      throw error;
+    });
+  }
+
+  return initPromise;
+}
+
+app.use(async (req, res, next) => {
+  try {
+    await ensureReady();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 app.use(helmet());
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || '*', credentials: true }));
@@ -35,3 +68,5 @@ app.use('/api/rss', rssRoutes);
 app.use('/api/search', searchRoutes);
 
 app.use(errorHandler);
+
+export default app;
