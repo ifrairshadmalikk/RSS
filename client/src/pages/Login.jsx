@@ -101,7 +101,7 @@ export default function Login() {
       setLoading(false);
     }
   }
-
+//
   const inputClass =
     'w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-10 py-3 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100';
 
