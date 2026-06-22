@@ -38,13 +38,13 @@ function SlidePhotos({ active }) {
 
 function SlideCaption({ active }) {
   return (
-    <div className="absolute inset-x-2 bottom-2 text-white xs:inset-x-3 xs:bottom-3 sm:inset-x-4 sm:bottom-4 md:inset-x-6 md:bottom-6 lg:inset-x-12 lg:bottom-12">
-      <p className="text-xs font-medium drop-shadow-sm xs:text-sm sm:text-base lg:text-lg">{SLIDES[active].tagline}</p>
-      <div className="mt-2 flex gap-1 xs:mt-2.5 xs:gap-1.5 sm:mt-3">
+    <div className="absolute inset-x-4 bottom-4 text-white lg:inset-x-12 lg:bottom-12">
+      <p className="text-sm font-medium drop-shadow-sm lg:text-lg">{SLIDES[active].tagline}</p>
+      <div className="mt-2 flex gap-1.5 sm:mt-3">
         {SLIDES.map((_, i) => (
           <span
             key={i}
-            className={`h-1 rounded-full transition-all duration-500 xs:h-1.5 ${i === active ? 'w-5 bg-white xs:w-6' : 'w-1 bg-white/40 xs:w-1.5'}`}
+            className={`h-1.5 rounded-full transition-all duration-500 ${i === active ? 'w-6 bg-white' : 'w-1.5 bg-white/40'}`}
           />
         ))}
       </div>
@@ -54,13 +54,13 @@ function SlideCaption({ active }) {
 
 function InputField({ label, icon, rightElement, children }) {
   return (
-    <div className="mb-3 sm:mb-4">
-      <label className="mb-1 block text-xs font-medium text-slate-700 sm:mb-1.5 sm:text-sm">{label}</label>
+    <div className="mb-4">
+      <label className="mb-1.5 block text-sm font-medium text-slate-700">{label}</label>
       <div className="relative flex items-center">
-        <span className="pointer-events-none absolute left-3 text-slate-400 sm:left-3.5">{icon}</span>
+        <span className="pointer-events-none absolute left-3.5 text-slate-400">{icon}</span>
         {children}
         {rightElement && (
-          <span className="absolute right-3 sm:right-3.5">{rightElement}</span>
+          <span className="absolute right-3.5">{rightElement}</span>
         )}
       </div>
     </div>
@@ -103,39 +103,39 @@ export default function Login() {
   }
 
   const inputClass =
-    'w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-10 py-2.5 text-xs text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 sm:rounded-xl sm:pl-10 sm:py-3 sm:text-sm';
+    'w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-10 py-3 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100';
 
   return (
     <main className="bg-white text-slate-900 lg:grid lg:h-screen lg:grid-cols-2 lg:overflow-hidden">
 
       {/* left: brand + form */}
-      <div className="flex flex-col px-4 py-4 sm:px-8 sm:py-6 md:px-12 lg:h-screen lg:overflow-y-auto lg:px-16 lg:py-8">
+      <div className="flex flex-col px-5 py-5 sm:px-10 sm:py-7 md:px-14 lg:h-screen lg:overflow-y-auto lg:px-16 lg:py-8">
 
         {/* logo */}
-        <div className="flex items-center gap-2">
-          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-blue-600 text-white sm:h-9 sm:w-9">
-            <Activity size={16} className="sm:hidden" />
-            <Activity size={18} className="hidden sm:block" />
+        <div className="flex items-center gap-2.5">
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-600 text-white">
+            <Activity size={18} />
           </div>
-          <span className="text-base font-semibold sm:text-lg">TrendWatch</span>
+          <span className="text-lg font-semibold">TrendWatch</span>
         </div>
 
         {/* mobile slide banner */}
-        <div className="relative mt-3 h-36 w-full overflow-hidden rounded-xl sm:mt-5 sm:h-44 md:h-52 lg:hidden">
+        <div className="relative mt-4 h-40 w-full overflow-hidden rounded-2xl sm:mt-6 sm:h-48 lg:hidden">
           <SlidePhotos active={slide} />
           <SlideCaption active={slide} />
         </div>
 
-        {/* form area — no flex-1 on mobile, just natural flow with top padding */}
-        <div className="pt-5 pb-8 sm:pt-6 lg:flex lg:flex-1 lg:items-center lg:py-0">
+        {/* form */}
+        <div className="pt-6 pb-10 lg:flex lg:flex-1 lg:items-center lg:py-0">
           <form onSubmit={handleSubmit} className="w-full max-w-sm lg:mx-auto">
-            <p className="text-xs text-slate-400 sm:text-sm">{isSignup ? 'Start your journey' : 'Welcome back'}</p>
-            <h1 className="mb-5 mt-1 text-xl font-bold leading-tight text-slate-900 sm:mb-8 sm:mt-2 sm:text-2xl md:text-[26px]">
+
+            <p className="text-sm text-slate-400">{isSignup ? 'Start your journey' : 'Welcome back'}</p>
+            <h1 className="mb-6 mt-1 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
               {isSignup ? 'Create your account' : 'Sign in to TrendWatch'}
             </h1>
 
             {isSignup && (
-              <InputField label="Full name" icon={<User size={16} />}>
+              <InputField label="Full name" icon={<User size={18} />}>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -146,7 +146,7 @@ export default function Login() {
               </InputField>
             )}
 
-            <InputField label="Email address" icon={<Mail size={16} />}>
+            <InputField label="Email address" icon={<Mail size={18} />}>
               <input
                 type="email"
                 value={email}
@@ -159,7 +159,7 @@ export default function Login() {
 
             <InputField
               label="Password"
-              icon={<Lock size={16} />}
+              icon={<Lock size={18} />}
               rightElement={
                 <button
                   type="button"
@@ -167,7 +167,7 @@ export default function Login() {
                   tabIndex={-1}
                   className="text-slate-400 transition-colors hover:text-slate-600"
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               }
             >
@@ -183,19 +183,19 @@ export default function Login() {
             </InputField>
 
             {error && (
-              <p className="mb-3 rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-600 sm:mb-4 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm">
+              <p className="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-600">
                 {error}
               </p>
             )}
 
             <button
               disabled={loading}
-              className="mt-1 h-10 w-full rounded-lg bg-blue-600 text-xs font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60 sm:mt-2 sm:h-12 sm:rounded-xl sm:text-sm"
+              className="mt-2 h-12 w-full rounded-xl bg-blue-600 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60"
             >
               {loading ? (isSignup ? 'Creating account…' : 'Signing in…') : isSignup ? 'Create account' : 'Sign in'}
             </button>
 
-            <p className="mt-4 text-center text-xs text-slate-500 sm:mt-6 sm:text-sm">
+            <p className="mt-5 text-center text-sm text-slate-500">
               {isSignup ? 'Already have an account? ' : "Don't have an account? "}
               <button
                 type="button"
