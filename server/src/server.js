@@ -60,8 +60,8 @@ const clientOrigins = process.env.CLIENT_ORIGIN
   : null;
 
 app.use(cors({
-  origin: clientOrigins || true,
-  credentials: Boolean(clientOrigins)
+  origin: ['https://rss-client-eight.vercel.app', 'http://localhost:5173'],
+  credentials: true
 }));
 app.use(express.json({ limit: '5mb' }));
 app.use(morgan('dev'));
