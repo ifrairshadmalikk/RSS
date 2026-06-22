@@ -27,6 +27,7 @@ router.post('/add', requireAuth, requireRole('admin'), async (req, res, next) =>
       sourceType: resolved.sourceType,
       category: body.category
     });
+    await RssFeed.deleteMany({ discoveredFrom: 'seed' });
     res.status(201).json({ item, resolved });
   } catch (error) {
     next(error);

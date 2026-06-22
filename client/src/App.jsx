@@ -18,6 +18,13 @@ function Protected({ children }) {
   return children;
 }
 
+function AdminOnly({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <Loader />;
+  if (user?.role !== 'admin') return <Navigate to="/" replace />;
+  return children;
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -29,7 +36,7 @@ export default function App() {
           <Route path="trends" element={<Trends />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="admin" element={<Admin />} />
+          <Route path="admin" element={<AdminOnly><Admin /></AdminOnly>} />
         </Route>
       </Routes>
     </AuthProvider>

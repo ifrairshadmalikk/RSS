@@ -34,12 +34,11 @@ router.post('/register', async (req, res, next) => {
       return res.status(409).json({ message: 'An account with this email already exists.' });
     }
 
-    const isFirstUser = await User.countDocuments() === 0;
     const user = await User.create({
       ...body,
       email,
       password: await bcrypt.hash(body.password, 12),
-      role: isFirstUser ? 'admin' : 'viewer'
+      role: 'viewer'
     });
     res.status(201).json({ token: sign(user), user: { id: user._id, name: user.name, email: user.email, role: user.role, profilePicture: user.profilePicture } });
   } catch (error) {

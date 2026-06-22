@@ -165,7 +165,7 @@ All analysis in the app is now powered by **Google's Gemini AI**:
 
 ### API Key Setup
 1. Get a Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
-2. Add to `.env`: `GEMINI_API_KEY=sk-proj-YOUR-KEY`
+2. Add to `.env`: `GEMINI_API_KEY=AIza-YOUR-KEY`
 3. Model used: `gemini-1.5-flash` (fast and cost-effective)
 
 ### Verifying Gemini is Working

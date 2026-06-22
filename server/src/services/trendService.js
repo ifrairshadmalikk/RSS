@@ -2,6 +2,7 @@ import { Article } from '../models/Article.js';
 import { AiLog } from '../models/AiLog.js';
 import { Notification } from '../models/Notification.js';
 import { Trend } from '../models/Trend.js';
+import { getGeminiApiKey, getGeminiModel, isGeminiConfigError } from './aiService.js';
 import { sendTrendEmailAlerts } from './emailService.js';
 
 function parseJsonObject(text, fallback) {
@@ -29,10 +30,8 @@ async function detectTrendsWithAi(articles) {
   const started = Date.now();
   
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY environment variable is required for trend detection');
-    }
-    
+    const apiKey = getGeminiApiKey();
+    const model = getGeminiModel();
     const prompt = `Analyze these news articles and extract the most trending topics. Return ONLY a JSON object with key "trends" containing an array of trend objects with these exact fields:
 - topic: the trending topic name (string, max 50 chars)
 - mentions: estimated number of mentions (number, 1-1000)
@@ -45,7 +44,7 @@ Be selective and only include real, verifiable trends with multiple article ment
 Articles to analyze:
 ${JSON.stringify(articles.slice(0, 100).map(a => ({ title: a.title, category: a.category, country: a.country, keywords: a.keywords, sentiment: a.sentiment })))}`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${process.env.GEMINI_MODEL || 'gemini-1.5-flash'}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
@@ -64,7 +63,9 @@ ${JSON.stringify(articles.slice(0, 100).map(a => ({ title: a.title, category: a.
     await AiLog.create({ provider, status: 'success', durationMs: Date.now() - started });
     return trends;
   } catch (error) {
-    await AiLog.create({ provider, status: 'failed', message: error.message, durationMs: Date.now() - started });
+    if (!isGeminiConfigError(error)) {
+      await AiLog.create({ provider, status: 'failed', message: error.message, durationMs: Date.now() - started });
+    }
     console.error('Gemini trend detection failed:', error);
     return [];
   }

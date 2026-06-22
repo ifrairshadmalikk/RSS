@@ -7,6 +7,7 @@ const rssFeedSchema = new mongoose.Schema(
     websiteUrl: String,
     discoveredFrom: String,
     sourceType: { type: String, enum: ['rss'], default: 'rss' },
+    roleAudience: { type: String, enum: ['admin', 'analyst', 'viewer', 'all'], default: 'all' },
     category: { type: String, default: 'General' },
     active: { type: Boolean, default: true },
     lastFetchedAt: Date,

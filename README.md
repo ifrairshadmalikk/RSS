@@ -88,7 +88,7 @@ Create `server/.env`:
 ```env
 MONGODB_URI=mongodb://127.0.0.1:27017/global-trend-monitor
 JWT_SECRET=your-long-random-secret-min-32-chars
-GEMINI_API_KEY=sk-proj-YOUR-ACTUAL-KEY-FROM-GOOGLE
+GEMINI_API_KEY=AIza-YOUR-ACTUAL-KEY-FROM-GOOGLE
 GEMINI_MODEL=gemini-1.5-flash
 AI_PROVIDER=gemini
 ADMIN_NAME=Admin
@@ -178,7 +178,7 @@ See **SETUP_AND_TROUBLESHOOTING.md** for:
 
 **Gemini API errors?**
 - Get free API key: https://aistudio.google.com/apikey
-- Set `GEMINI_API_KEY=sk-proj-YOUR-KEY`
+- Set `GEMINI_API_KEY=AIza-YOUR-KEY`
 - Restart server
 
 ## 📞 Development

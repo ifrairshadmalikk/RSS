@@ -15,7 +15,7 @@ export default function Admin() {
   const [adminUsers, setAdminUsers] = useState([]);
   const [adminUsersLoading, setAdminUsersLoading] = useState(false);
   const feeds = useAsync(async () => (await api.get('/rss')).data, []);
-  const dashboard = useAsync(async () => (await api.get('/dashboard')).data, []);
+  const aiLogs = useAsync(async () => (await api.get('/dashboard/ai-logs')).data, []);
   const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function Admin() {
     }
   }
 
-  if ((feeds.loading || dashboard.loading || adminUsersLoading) && isAdmin) return <Loader />;
+  if ((feeds.loading || aiLogs.loading || adminUsersLoading) && isAdmin) return <Loader />;
 
   async function addFeed(event) {
     event.preventDefault();
@@ -86,7 +86,7 @@ export default function Admin() {
   async function fetchNow() {
     await api.post('/rss/fetch');
     feeds.reload();
-    dashboard.reload();
+    aiLogs.reload();
   }
 
   return (
@@ -111,6 +111,8 @@ export default function Admin() {
             </div>
             {adminUsersLoading ? (
               <Loader />
+            ) : adminUsers.length === 0 ? (
+              <p className="text-sm text-slate-500">No other users.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -134,7 +136,6 @@ export default function Admin() {
                             onChange={(e) => updateUserRole(u._id, e.target.value)} 
                             className="rounded border border-slate-200 bg-white px-2 py-1 text-sm dark:border-slate-800 dark:bg-slate-900"
                           >
-                            <option value="admin">Admin</option>
                             <option value="analyst">Analyst</option>
                             <option value="viewer">Viewer</option>
                           </select>
@@ -206,15 +207,22 @@ export default function Admin() {
             <Card>
               <h3 className="mb-4 font-semibold">AI Analysis Logs</h3>
               <div className="space-y-2">
-                {dashboard.data?.aiLogs?.slice(0, 10).map((log) => (
-                  <div key={log._id} className="rounded bg-slate-100/70 p-3 text-sm dark:bg-slate-900/60">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-medium">{log.provider}</span>
-                      <Pill className={log.status === 'success' ? 'bg-emerald-500/12 text-emerald-700' : 'bg-rose-500/12 text-rose-700'}>{log.status}</Pill>
+                {!aiLogs.data?.items?.length ? (
+                  <p className="text-sm text-slate-500">No AI analysis runs yet.</p>
+                ) : (
+                  aiLogs.data.items.slice(0, 10).map((log) => (
+                    <div key={log._id} className="rounded bg-slate-100/70 p-3 text-sm dark:bg-slate-900/60">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium">{log.provider}</span>
+                        <Pill className={log.status === 'success' ? 'bg-emerald-500/12 text-emerald-700' : 'bg-rose-500/12 text-rose-700'}>{log.status}</Pill>
+                      </div>
+                      {log.message && (
+                        <p className="mt-2 line-clamp-3 text-xs leading-5 text-rose-700 dark:text-rose-300">{log.message}</p>
+                      )}
+                      <p className="mt-1 text-xs text-slate-500">{dateTime(log.createdAt)} - {log.durationMs || 0}ms</p>
                     </div>
-                    <p className="mt-1 text-xs text-slate-500">{dateTime(log.createdAt)} - {log.durationMs || 0}ms</p>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </Card>
           </div>

@@ -101,7 +101,7 @@ export function Shell() {
             </NavLink>
           ))}
           <div className="my-2 border-t border-slate-200 dark:border-slate-800"></div>
-          {adminLinks.map(({ to, label, icon: Icon }) => (
+          {user?.role === 'admin' && adminLinks.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to} end={to === '/'} onClick={() => setOpen(false)} className={({ isActive }) => `flex h-10 items-center gap-3 rounded px-3 text-sm font-medium ${isActive ? 'bg-rose-600 text-white shadow-card' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white'}`}>
               <span className="grid h-5 w-5 place-items-center"><Icon size={18} /></span> {label}
             </NavLink>

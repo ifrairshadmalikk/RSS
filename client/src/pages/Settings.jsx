@@ -87,22 +87,6 @@ export default function Settings() {
     reader.readAsDataURL(file);
   }
 
-  async function updateBrowserAlerts(checked) {
-    if (!checked) {
-      setFormData((current) => ({ ...current, browserNotificationsEnabled: false }));
-      return;
-    }
-    if (!('Notification' in window)) {
-      setMessage('This browser does not support notifications');
-      return;
-    }
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      setFormData((current) => ({ ...current, browserNotificationsEnabled: true, notificationsEnabled: true }));
-      setMessage('Browser notifications enabled. Save changes to keep this setting.');
-    }
-  }
-
   async function updateUserRole(userId, newRole) {
     try {
       await api.put(`/profile/admin/users/${userId}/role`, { role: newRole });
@@ -162,17 +146,6 @@ export default function Settings() {
               <label className="block text-sm font-medium mb-2">Full Name</label>
               <input className="field w-full" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Bio</label>
-              <textarea className="focus-ring w-full rounded border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900" rows={3} value={formData.bio} onChange={(e) => setFormData({ ...formData, bio: e.target.value })} placeholder="Tell us about yourself..." />
-            </div>
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={formData.notificationsEnabled} onChange={(e) => setFormData({ ...formData, notificationsEnabled: e.target.checked })} />
-              <span className="text-sm font-medium">Enable Notifications</span>
-            </label>
-            <div className="grid gap-3 md:grid-cols-2">
-              <Toggle label="Browser alerts" checked={formData.browserNotificationsEnabled} onChange={updateBrowserAlerts} />
-            </div>
             {message && <p className={`text-sm rounded p-3 ${message.includes('success') ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>{message}</p>}
             <button disabled={loading} className="btn-primary">
               {loading ? 'Saving...' : 'Save Changes'}
@@ -187,6 +160,8 @@ export default function Settings() {
           <h3 className="mb-4 text-lg font-semibold">User Management</h3>
           {adminLoading ? (
             <Loader />
+          ) : adminUsers.length === 0 ? (
+            <p className="text-sm text-slate-500">No other users.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -205,9 +180,8 @@ export default function Settings() {
                       <td className="py-3 px-4">{u.email}</td>
                       <td className="py-3 px-4">
                         <select value={u.role} onChange={(e) => updateUserRole(u._id, e.target.value)} className="rounded border border-slate-200 bg-white px-2 py-1 dark:border-slate-700 dark:bg-slate-900">
-                          <option>admin</option>
-                          <option>analyst</option>
-                          <option>viewer</option>
+                          <option value="analyst">Analyst</option>
+                          <option value="viewer">Viewer</option>
                         </select>
                       </td>
                       <td className="py-3 px-4">
@@ -224,14 +198,5 @@ export default function Settings() {
         </Card>
       )}
     </div>
-  );
-}
-
-function Toggle({ label, checked, onChange }) {
-  return (
-    <label className="flex items-center justify-between rounded border border-slate-200 px-3 py-2 text-sm dark:border-slate-800">
-      <span className="font-medium">{label}</span>
-      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} />
-    </label>
   );
 }

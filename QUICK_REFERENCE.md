@@ -2,7 +2,7 @@
 
 ## Environment Setup (server/.env)
 ```env
-GEMINI_API_KEY=sk-proj-YOUR-KEY          # Get from aistudio.google.com/apikey
+GEMINI_API_KEY=AIza-YOUR-KEY             # Get from aistudio.google.com/apikey
 MONGODB_URI=mongodb://127.0.0.1:27017/global-trend-monitor
 JWT_SECRET=your-secret-min-32-chars
 ADMIN_EMAIL=admin@trends.local

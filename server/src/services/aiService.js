@@ -4,6 +4,29 @@ import { fetchLiveTrends } from './googleTrendsService.js';
 
 const categories = ['Technology', 'Cryptocurrency', 'Politics', 'Business', 'Sports', 'Health', 'Entertainment', 'Science', 'War', 'Disaster', 'Climate', 'Culture', 'Education', 'Travel'];
 
+export function getGeminiApiKey() {
+  const key = process.env.GEMINI_API_KEY?.trim();
+  if (!key) {
+    throw new Error('GEMINI_API_KEY environment variable is required for Gemini AI');
+  }
+  if (key.includes('YOUR') || key.includes('replace-with') || key.startsWith('sk-') || !key.startsWith('AIza')) {
+    throw new Error('GEMINI_API_KEY must be a Google AI Studio API key. Create one at https://aistudio.google.com/apikey and set the value that starts with AIza.');
+  }
+  return key;
+}
+
+export function isGeminiConfigError(error) {
+  return error?.message?.includes('GEMINI_API_KEY');
+}
+
+export function getGeminiModel() {
+  const model = process.env.GEMINI_MODEL?.trim() || 'gemini-1.5-flash';
+  if (model === 'gemini-3.5-flash') {
+    return 'gemini-1.5-flash';
+  }
+  return model;
+}
+
 function parseJsonObject(text, fallback) {
   const cleaned = String(text || '').replace(/```json|```/g, '').trim();
   const start = cleaned.indexOf('{');
@@ -17,7 +40,8 @@ function parseJsonObject(text, fallback) {
 }
 
 async function geminiAnalysis(article) {
-  const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+  const model = getGeminiModel();
+  const apiKey = getGeminiApiKey();
   const prompt = `Analyze this news article and return ONLY a JSON object with these fields:
 - summary: brief 1-2 sentence summary
 - keywords: array of 5-8 important keywords
@@ -28,7 +52,7 @@ async function geminiAnalysis(article) {
 
 Article: ${JSON.stringify(article)}`;
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
@@ -54,13 +78,14 @@ Article: ${JSON.stringify(article)}`;
 }
 
 async function geminiChat(messages, systemPrompt) {
-  const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+  const model = getGeminiModel();
+  const apiKey = getGeminiApiKey();
   const contents = messages.map((msg) => ({
     role: msg.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: msg.content }]
   }));
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -91,10 +116,6 @@ async function buildAssistantContext() {
 }
 
 export async function chatWithAssistant(message, history = []) {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY is required for the AI assistant');
-  }
-
   const { articleLines, trendLines } = await buildAssistantContext();
   const systemPrompt = `You are TrendWatch AI Assistant — a helpful news and trends expert inside the TrendWatch app.
 Help users with news summaries, trending topics, category insights, and general questions about current events.
@@ -119,15 +140,13 @@ export async function analyzeArticle(article) {
   const provider = 'gemini';
   
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY environment variable is required for AI article analysis');
-    }
-    
     const result = await geminiAnalysis(article);
     await AiLog.create({ article: article._id, provider, status: 'success', durationMs: Date.now() - started });
     return { ...result, aiProvider: provider };
   } catch (error) {
-    await AiLog.create({ article: article._id, provider, status: 'failed', message: error.message, durationMs: Date.now() - started });
+    if (!isGeminiConfigError(error)) {
+      await AiLog.create({ article: article._id, provider, status: 'failed', message: error.message, durationMs: Date.now() - started });
+    }
     console.error('Gemini article analysis failed:', error);
     return {
       summary: article.description?.slice(0, 240) || article.title || '',

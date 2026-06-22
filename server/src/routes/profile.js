@@ -37,20 +37,27 @@ router.put('/', requireAuth, async (req, res, next) => {
   }
 });
 
-// Admin: Get all users
+// Admin: Get non-admin users only
 router.get('/admin/users', requireAuth, requireRole('admin'), async (_req, res, next) => {
   try {
-    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    const users = await User.find({ role: { $ne: 'admin' } }).select('-password').sort({ createdAt: -1 });
     res.json({ users });
   } catch (error) {
     next(error);
   }
 });
 
-// Admin: Update user role
+// Admin: Update user role (admin role not assignable)
 router.put('/admin/users/:userId/role', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
-    const body = z.object({ role: z.enum(['admin', 'analyst', 'viewer']) }).parse(req.body);
+    const body = z.object({ role: z.enum(['analyst', 'viewer']) }).parse(req.body);
+    const target = await User.findById(req.params.userId);
+    if (!target) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+    if (target.role === 'admin') {
+      return res.status(403).json({ message: 'The admin account cannot be modified.' });
+    }
     const user = await User.findByIdAndUpdate(req.params.userId, body, { new: true }).select('-password');
     res.json({ user });
   } catch (error) {
@@ -61,6 +68,13 @@ router.put('/admin/users/:userId/role', requireAuth, requireRole('admin'), async
 // Admin: Delete user
 router.delete('/admin/users/:userId', requireAuth, requireRole('admin'), async (req, res, next) => {
   try {
+    const target = await User.findById(req.params.userId);
+    if (!target) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+    if (target.role === 'admin') {
+      return res.status(403).json({ message: 'The admin account cannot be deleted.' });
+    }
     await User.findByIdAndDelete(req.params.userId);
     res.status(204).end();
   } catch (error) {

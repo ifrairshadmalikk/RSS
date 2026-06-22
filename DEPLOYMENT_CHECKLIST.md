@@ -92,7 +92,7 @@ In Render dashboard, set:
 ```
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/dbname?retryWrites=true&w=majority
 JWT_SECRET=your-super-long-random-secret-min-32-chars
-GEMINI_API_KEY=sk-proj-YOUR-PRODUCTION-KEY
+GEMINI_API_KEY=AIza-YOUR-PRODUCTION-KEY
 GEMINI_MODEL=gemini-1.5-flash
 AI_PROVIDER=gemini
 ADMIN_NAME=Admin
