@@ -126,11 +126,12 @@ export default function Login() {
           <SlideCaption active={slide} />
         </div>
 
-        {/* form — takes remaining space and centers itself */}
-        <div className="flex flex-1 items-center justify-center py-6 lg:py-0">
+        {/* ✅ FIX: removed flex-1 + items-center on mobile to prevent the huge gap.
+            On desktop (lg) we still center vertically using flex-1 + justify-center. */}
+        <div className="w-full max-w-sm py-6 lg:flex lg:flex-1 lg:items-center lg:justify-center lg:py-0 lg:self-center lg:mx-auto">
           <form
             onSubmit={handleSubmit}
-            className="w-full max-w-sm"
+            className="w-full"
           >
             <p className="text-xs text-slate-400 sm:text-sm">{isSignup ? 'Start your journey' : 'Welcome back'}</p>
             <h1 className="mb-5 mt-1 text-xl font-bold leading-tight text-slate-900 sm:mb-8 sm:mt-2 sm:text-2xl md:text-[26px]">
