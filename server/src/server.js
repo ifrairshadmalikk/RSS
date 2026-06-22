@@ -15,7 +15,7 @@ import rssRoutes from './routes/rss.js';
 import searchRoutes from './routes/search.js';
 import trendRoutes from './routes/trends.js';
 import { errorHandler } from './middleware/errorHandler.js';
-
+//server
 export const app = express();
 
 let initPromise = null;
