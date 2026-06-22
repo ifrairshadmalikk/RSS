@@ -53,8 +53,6 @@ app.use(async (req, res, next) => {
   }
 });
 
-app.use(helmet());
-
 const clientOrigins = process.env.CLIENT_ORIGIN
   ? process.env.CLIENT_ORIGIN.split(',').map((value) => value.trim()).filter(Boolean)
   : null;
@@ -63,6 +61,8 @@ app.use(cors({
   origin: ['https://rss-client-eight.vercel.app', 'http://localhost:5173'],
   credentials: true
 }));
+
+app.use(helmet());
 app.use(express.json({ limit: '5mb' }));
 app.use(morgan('dev'));
 
