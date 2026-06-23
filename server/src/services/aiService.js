@@ -3,6 +3,16 @@ import { Article } from '../models/Article.js';
 import { fetchLiveTrends } from './googleTrendsService.js';
 
 const categories = ['Technology', 'Cryptocurrency', 'Politics', 'Business', 'Sports', 'Health', 'Entertainment', 'Science', 'War', 'Disaster', 'Climate', 'Culture', 'Education', 'Travel'];
+const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
+const DEFAULT_GEMINI_FALLBACK_MODELS = ['gemini-2.5-flash-lite'];
+const retiredGeminiModelAliases = new Map([
+  ['gemini-pro', DEFAULT_GEMINI_MODEL],
+  ['gemini-pro-latest', DEFAULT_GEMINI_MODEL],
+  ['gemini-1.5-flash', DEFAULT_GEMINI_MODEL],
+  ['gemini-1.5-flash-latest', DEFAULT_GEMINI_MODEL],
+  ['gemini-1.5-pro', 'gemini-2.5-pro'],
+  ['gemini-1.5-pro-latest', 'gemini-2.5-pro']
+]);
 
 export function getGeminiApiKey() {
   const key = process.env.GEMINI_API_KEY?.trim();
@@ -22,9 +32,65 @@ export function isGeminiConfigError(error) {
 
 export function getGeminiModel() {
   const model = process.env.GEMINI_MODEL?.trim();
+  if (!model) return DEFAULT_GEMINI_MODEL;
 
-  // safest default
-  return model || 'gemini-1.5-flash-latest';
+  return retiredGeminiModelAliases.get(model) || model;
+}
+
+function normalizeGeminiModel(model) {
+  const trimmed = String(model || '').trim();
+  return retiredGeminiModelAliases.get(trimmed) || trimmed;
+}
+
+function getGeminiFallbackModels() {
+  const configured = process.env.GEMINI_FALLBACK_MODELS?.split(',').map(normalizeGeminiModel).filter(Boolean);
+  const fallbackModels = configured?.length ? configured : DEFAULT_GEMINI_FALLBACK_MODELS;
+  return [...new Set(fallbackModels)].filter((model) => model !== getGeminiModel());
+}
+
+function isRetryableGeminiStatus(status) {
+  return [429, 500, 502, 503, 504].includes(status);
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function generateGeminiContent(body, { maxRetries = 2 } = {}) {
+  const apiKey = getGeminiApiKey();
+  const models = [getGeminiModel(), ...getGeminiFallbackModels()];
+  let lastError = null;
+
+  for (const model of models) {
+    for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (response.ok) {
+          return response.json();
+        }
+
+        const detail = await response.text().catch(() => response.statusText);
+        lastError = new Error(`Gemini API error: ${response.status} ${detail.slice(0, 300)}`);
+
+        if (!isRetryableGeminiStatus(response.status)) {
+          throw lastError;
+        }
+      } catch (error) {
+        lastError = error;
+      }
+
+      if (attempt < maxRetries) {
+        await wait(500 * (attempt + 1));
+      }
+    }
+  }
+
+  throw lastError || new Error('Gemini API error: request failed');
 }
 
 function parseJsonObject(text, fallback) {
@@ -40,8 +106,6 @@ function parseJsonObject(text, fallback) {
 }
 
 async function geminiAnalysis(article) {
-  const model = getGeminiModel();
-  const apiKey = getGeminiApiKey();
   const prompt = `Analyze this news article and return ONLY a JSON object with these fields:
 - summary: brief 1-2 sentence summary
 - keywords: array of 5-8 important keywords
@@ -52,18 +116,7 @@ async function geminiAnalysis(article) {
 
 Article: ${JSON.stringify(article)}`;
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-  });
-  
-  if (!response.ok) {
-    const detail = await response.text().catch(() => response.statusText);
-    throw new Error(`Gemini API error: ${response.status} ${detail.slice(0, 300)}`);
-  }
-  
-  const data = await response.json();
+  const data = await generateGeminiContent({ contents: [{ parts: [{ text: prompt }] }] });
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
   const parsed = parseJsonObject(text, {});
   
@@ -78,28 +131,15 @@ Article: ${JSON.stringify(article)}`;
 }
 
 async function geminiChat(messages, systemPrompt) {
-  const model = getGeminiModel();
-  const apiKey = getGeminiApiKey();
   const contents = messages.map((msg) => ({
     role: msg.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: msg.content }]
   }));
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents
-    })
+  const data = await generateGeminiContent({
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+    contents
   });
-
-  if (!response.ok) {
-    const detail = await response.text().catch(() => response.statusText);
-    throw new Error(`Gemini API error: ${response.status} ${detail.slice(0, 300)}`);
-  }
-
-  const data = await response.json();
   return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Sorry, I could not generate a response.';
 }
 
