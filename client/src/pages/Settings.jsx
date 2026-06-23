@@ -60,7 +60,15 @@ export default function Settings() {
     e.preventDefault();
     try {
       setLoading(true);
-      const { data } = await api.put('/profile', { ...formData, emailAlertsEnabled: false, pdfAlertsEnabled: false });
+      let payload = { ...formData, emailAlertsEnabled: false, pdfAlertsEnabled: false };
+      if (formData.browserNotificationsEnabled && 'Notification' in window && Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          payload = { ...payload, browserNotificationsEnabled: false };
+          setFormData((current) => ({ ...current, browserNotificationsEnabled: false }));
+        }
+      }
+      const { data } = await api.put('/profile', payload);
       updateUser(data.user);
       setMessage('Profile updated successfully!');
       setTimeout(() => setMessage(''), 3000);
@@ -145,6 +153,26 @@ export default function Settings() {
             <div>
               <label className="block text-sm font-medium mb-2">Full Name</label>
               <input className="field w-full" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+            </div>
+            <div className="grid gap-3 rounded border border-slate-200 p-4 dark:border-slate-800">
+              <label className="flex items-center justify-between gap-4 text-sm font-medium">
+                <span>In-app notification sound</span>
+                <input
+                  type="checkbox"
+                  checked={formData.notificationsEnabled}
+                  onChange={(e) => setFormData({ ...formData, notificationsEnabled: e.target.checked })}
+                  className="h-5 w-5 accent-cyan-600"
+                />
+              </label>
+              <label className="flex items-center justify-between gap-4 text-sm font-medium">
+                <span>Browser notifications</span>
+                <input
+                  type="checkbox"
+                  checked={formData.browserNotificationsEnabled}
+                  onChange={(e) => setFormData({ ...formData, browserNotificationsEnabled: e.target.checked })}
+                  className="h-5 w-5 accent-cyan-600"
+                />
+              </label>
             </div>
             {message && <p className={`text-sm rounded p-3 ${message.includes('success') ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>{message}</p>}
             <button disabled={loading} className="btn-primary">

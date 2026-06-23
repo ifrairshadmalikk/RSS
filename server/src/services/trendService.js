@@ -25,6 +25,25 @@ function dominantSentiment(articles) {
   return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Neutral';
 }
 
+function tokenizeTopic(value) {
+  return String(value || '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length > 2);
+}
+
+function matchesTopic(article, topic) {
+  const text = `${article.title} ${article.summary || ''} ${(article.keywords || []).join(' ')}`.toLowerCase();
+  const normalizedTopic = String(topic || '').toLowerCase();
+  if (text.includes(normalizedTopic)) return true;
+
+  const tokens = tokenizeTopic(topic);
+  if (!tokens.length) return false;
+  const requiredMatches = tokens.length === 1 ? 1 : Math.ceil(tokens.length * 0.6);
+  const matches = tokens.filter((token) => text.includes(token)).length;
+  return matches >= requiredMatches;
+}
+
 async function detectTrendsWithAi(articles) {
   const provider = 'gemini';
   const started = Date.now();
@@ -74,6 +93,7 @@ export async function detectTrends() {
   }
 
   const writes = [];
+  let notificationsCreated = 0;
   const threshold = Number(process.env.TREND_NOTIFICATION_THRESHOLD || 5);
 
   for (const aiTrend of aiTrends) {
@@ -81,11 +101,7 @@ export async function detectTrends() {
     if (!topic || topic.length < 2) continue;
 
     const relatedArticles = recent
-      .filter(a => {
-        const text = `${a.title} ${(a.keywords || []).join(' ')}`.toLowerCase();
-        return text.includes(topic.toLowerCase());
-      })
-      .slice(0, 10);
+      .filter(a => matchesTopic(a, topic));
 
     if (relatedArticles.length < 2) continue;
 
@@ -141,6 +157,7 @@ export async function detectTrends() {
             mentions,
             message: aiTrend.summary || `Breaking: ${topic} trending in ${category} (${country}) with ${mentions} articles.`
           });
+          notificationsCreated += 1;
           sendTrendEmailAlerts({
             topic,
             category,
@@ -161,5 +178,6 @@ export async function detectTrends() {
   }
 
   if (writes.length) await Trend.bulkWrite(writes);
+  console.log(`Trend detection complete: ${aiTrends.length} AI trends, ${writes.length} trend updates, ${notificationsCreated} notifications.`);
   return { topics: writes.length };
 }

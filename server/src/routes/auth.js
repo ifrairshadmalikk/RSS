@@ -12,6 +12,18 @@ function sign(user) {
   return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'dev-secret', { expiresIn: '7d' });
 }
 
+function publicUser(user) {
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    profilePicture: user.profilePicture,
+    notificationsEnabled: user.notificationsEnabled !== false,
+    browserNotificationsEnabled: user.browserNotificationsEnabled === true
+  };
+}
+
 router.post('/login', async (req, res, next) => {
   try {
     const body = credentials.parse(req.body);
@@ -19,7 +31,7 @@ router.post('/login', async (req, res, next) => {
     if (!user || !(await bcrypt.compare(body.password, user.password))) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
-    res.json({ token: sign(user), user: { id: user._id, name: user.name, email: user.email, role: user.role, profilePicture: user.profilePicture } });
+    res.json({ token: sign(user), user: publicUser(user) });
   } catch (error) {
     next(error);
   }
@@ -40,7 +52,7 @@ router.post('/register', async (req, res, next) => {
       password: await bcrypt.hash(body.password, 12),
       role: 'viewer'
     });
-    res.status(201).json({ token: sign(user), user: { id: user._id, name: user.name, email: user.email, role: user.role, profilePicture: user.profilePicture } });
+    res.status(201).json({ token: sign(user), user: publicUser(user) });
   } catch (error) {
     next(error);
   }

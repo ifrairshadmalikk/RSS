@@ -4,7 +4,15 @@ import { api } from '../api/client.js';
 const AuthContext = createContext(null);
 
 function normalizeUser(user) {
-  return user ? { id: user.id || user._id, name: user.name, email: user.email, role: user.role, profilePicture: user.profilePicture } : null;
+  return user ? {
+    id: user.id || user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    profilePicture: user.profilePicture,
+    notificationsEnabled: user.notificationsEnabled !== false,
+    browserNotificationsEnabled: user.browserNotificationsEnabled === true
+  } : null;
 }
 
 function storeSession(token, user) {

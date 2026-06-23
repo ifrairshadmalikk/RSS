@@ -1,5 +1,5 @@
 import { Bell, FileDown, LayoutDashboard, LogOut, Menu, Moon, Newspaper, Rss, Search, Settings, Shield, Sun, TrendingUp, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from './AuthContext.jsx';
@@ -22,6 +22,9 @@ export function Shell() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [notifications, setNotifications] = useState([]);
+  const seenNotificationIds = useRef(new Set());
+  const initializedNotifications = useRef(false);
+  const audioContext = useRef(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -33,28 +36,100 @@ export function Shell() {
   const initials = useMemo(() => user?.name?.split(' ').map((part) => part[0]).join('').slice(0, 2) || 'U', [user]);
   const unreadCount = notifications.filter((item) => !item.read).length;
 
+  useEffect(() => {
+    seenNotificationIds.current = new Set();
+    initializedNotifications.current = false;
+  }, [user?.id]);
+
   const loadNotifications = useCallback(async () => {
     const { data } = await api.get('/notifications');
     const items = data.items || [];
     setNotifications(items);
-    return items[0];
+    return items;
+  }, []);
+
+  const playNotificationSound = useCallback(() => {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+
+      const context = audioContext.current || new AudioContext();
+      audioContext.current = context;
+
+      if (context.state === 'suspended') {
+        context.resume().catch(() => {});
+      }
+
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, context.currentTime);
+      oscillator.frequency.setValueAtTime(660, context.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.0001, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.18, context.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.35);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start();
+      oscillator.stop(context.currentTime + 0.38);
+    } catch (error) {
+      console.warn('Notification sound could not play', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    function unlockAudio() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext || audioContext.current) return;
+        audioContext.current = new AudioContext();
+        audioContext.current.resume().catch(() => {});
+      } catch {
+        // Sound is best-effort because browsers can block audio until interaction.
+      }
+    }
+
+    window.addEventListener('pointerdown', unlockAudio, { once: true });
+    window.addEventListener('keydown', unlockAudio, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
   }, []);
 
   useEffect(() => {
     if (!user) return;
-    loadNotifications();
+    async function refresh({ notify = false } = {}) {
+      const items = await loadNotifications();
+      const unreadNewItems = items.filter((item) => !item.read && !seenNotificationIds.current.has(item._id));
+
+      items.forEach((item) => seenNotificationIds.current.add(item._id));
+
+      if (!initializedNotifications.current) {
+        initializedNotifications.current = true;
+        return;
+      }
+
+      if (!notify || !unreadNewItems.length || user.notificationsEnabled === false) return;
+
+      playNotificationSound();
+
+      if ('Notification' in window && user.browserNotificationsEnabled && Notification.permission === 'granted') {
+        const latest = unreadNewItems[0];
+        new Notification('Breaking Trend Detected!', { body: latest.message });
+      }
+    }
+
+    refresh().catch((error) => console.error('Failed to fetch notifications', error));
     const id = setInterval(async () => {
       try {
-        const latest = await loadNotifications();
-        if (latest && !latest.read && 'Notification' in window && Notification.permission === 'granted') {
-          new Notification('Breaking Trend Detected!', { body: latest.message });
-        }
+        await refresh({ notify: true });
       } catch (error) {
         console.error('Failed to fetch notifications', error);
       }
-    }, 60000);
+    }, 15000);
     return () => clearInterval(id);
-  }, [loadNotifications, user]);
+  }, [loadNotifications, playNotificationSound, user]);
 
   function submitSearch(event) {
     event.preventDefault();
