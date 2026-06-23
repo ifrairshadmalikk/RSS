@@ -21,11 +21,10 @@ export function isGeminiConfigError(error) {
 }
 
 export function getGeminiModel() {
-  const model = process.env.GEMINI_MODEL?.trim() || 'gemini-1.5-flash';
-  if (model === 'gemini-3.5-flash') {
-    return 'gemini-1.5-flash';
-  }
-  return model;
+  const model = process.env.GEMINI_MODEL?.trim();
+
+  // safest default
+  return model || 'gemini-1.5-flash-latest';
 }
 
 function parseJsonObject(text, fallback) {
