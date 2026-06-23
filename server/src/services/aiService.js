@@ -9,7 +9,7 @@ export function getGeminiApiKey() {
   if (!key) {
     throw new Error('GEMINI_API_KEY environment variable is required for Gemini AI');
   }
-  if (key.includes('YOUR') || key.includes('replace-with') || key.startsWith('sk-') || !key.startsWith('AIza')) {
+  if (key.includes('YOUR') || key.includes('replace-with') || key.startsWith('sk-') ) {
     throw new Error('GEMINI_API_KEY must be a Google AI Studio API key. Create one at https://aistudio.google.com/apikey and set the value that starts with AIza.');
   }
   return key;
