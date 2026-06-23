@@ -14,6 +14,7 @@ export function getGeminiApiKey() {
   }
   return key;
 }
+//add
 
 export function isGeminiConfigError(error) {
   return error?.message?.includes('GEMINI_API_KEY');
